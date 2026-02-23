@@ -1,0 +1,41 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+    dependencies {
+        // 给整个项目定调子：使用哪个版本的 Gradle 插件和 Kotlin 插件
+        classpath 'com.android.tools.build:gradle:8.7.0'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+    }
+}
+
+plugins {
+    // 这里的 apply false 表示：我知道有这个插件，版本是 8.7.0，
+    // alias(libs.plugins.android.application) apply false
+    // 但我现在（在根目录）先不用它，等子模块要用的时候再给它们。
+    id 'com.android.application' version '8.7.0' apply false
+    id 'com.android.library' version '8.7.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+}
+
+// 定义变量供所有子模块引用
+ext {
+    versionCompiler = 35        // 适配 API 35
+    versionTarget = 35
+    minSdkVersion = 24          // 建议至少 24
+    versionCode = 1
+    versionNameString = "1.0.0"
+    androidXVersion = '1.6.1'   // 升级到 AndroidX 稳定版
+    constraintlayoutVersion = '2.1.4'
+    materialVersion = '1.11.0'
+    versionBuildTool = '27.0.3'
+    javaSourceCompatibility = JavaVersion.VERSION_1_8
+    javaTargetCompatibility = JavaVersion.VERSION_1_8
+
+}

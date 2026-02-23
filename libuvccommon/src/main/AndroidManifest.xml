@@ -1,0 +1,8 @@
+<!--manifest
+	package="com.jiangdg.common">
+</manifest-->
+
+
+    <!-- ✅ 修改后 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+</manifest>

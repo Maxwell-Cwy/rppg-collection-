@@ -1,0 +1,69 @@
+# ========================
+# Android / Gradle
+# ========================
+
+# Build directories (covers all modules)
+/build/
+*/build/
+
+# Gradle
+.gradle/
+**/.gradle/
+
+# Intermediate build files
+**/intermediates/
+**/transforms/
+**/build/.transforms/
+**/outputs/
+**/reports/
+**/tmp/
+
+# Dex and compiled files
+*.apk
+*.ap_
+*.aab
+*.dex
+*.jar
+*.class
+
+# Native builds
+.externalNativeBuild/
+.cxx/
+**/CMakeFiles/
+**/cmake_build/
+
+# ========================
+# IDE (Android Studio / IntelliJ)
+# ========================
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Specific .idea files to ignore even if .idea is tracked (optional)
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+
+# ========================
+# Local & Sensitive
+# ========================
+
+# Local SDK/NDK path
+local.properties
+
+# Keystore files (CRITICAL: NEVER commit!)
+*.jks
+*.keystore
+*.bks
+
+# ========================
+# OS & Misc
+# ========================
+
+.DS_Store
+Thumbs.db
+captures/
+~
+

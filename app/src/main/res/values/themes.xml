@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme (Material3) -->
+    <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 1. 补充Material3核心颜色（与你的colors.xml对应） -->
+        <item name="colorPrimary">@color/colorPrimary</item>         <!-- 主色（蓝牙按钮用） -->
+        <item name="colorPrimaryContainer">@color/colorPrimaryContainer</item> <!-- 主色容器 -->
+        <item name="colorSecondary">@color/colorAccent</item>       <!-- 次要色（开始检测按钮用） -->
+        <item name="colorSecondaryContainer">@color/colorAccentContainer</item> <!-- 次要色容器 -->
+        <item name="colorOnPrimary">@color/white</item>             <!-- 主色上的文本色（白色） -->
+        <item name="colorOnSecondary">@color/white</item>           <!-- 次要色上的文本色（白色） -->
+
+        <!-- 2. 配置MaterialButton默认样式（Material3兼容） -->
+        <item name="materialButtonStyle">@style/Widget.Material3.Button</item>
+    </style>
+
+    <!-- 应用主题（继承Base主题，无需修改） -->
+    <style name="Theme.MyApplication" parent="Base.Theme.MyApplication" />
+
+
+
+    <style name="TransparentBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+
+</resources>

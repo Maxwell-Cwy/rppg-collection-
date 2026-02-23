@@ -1,0 +1,67 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android' // 使用完整 id 兼容性更好
+}
+
+android {
+    // 2. 建议：引用根目录 ext 定义的版本，或者直接写 35
+    compileSdk 35
+    // 1. 必须：添加 Namespace 适配 Gradle 8.x
+    // 如果是 libuvc 模块，请改为 'com.jiangdg.uvc'
+    namespace 'com.jiangdg.libnative'
+
+
+
+    defaultConfig {
+        // 建议提升到 24，API 35 环境下 19 太低了
+        minSdk 24
+        targetSdk 35
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+                // 确保支持现代平板的 64 位架构
+                abiFilters 'armeabi-v7a','arm64-v8a'
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            // 3. 建议：去掉具体的版本号，让 Gradle 自动匹配安装的版本
+            // 或者改为你 SDK Manager 里已有的版本，如 "3.22.1"
+            version "3.22.1"
+        }
+    }
+
+    // 4. 必须：升级 Java 版本以适配 Gradle 8.13
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+}
+
+dependencies {
+    // 5. 建议：升级依赖版本以适配 AndroidX 和 API 35
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

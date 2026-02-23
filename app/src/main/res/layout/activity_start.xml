@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f0f8ff">
+
+    <!-- 全屏背景 -->
+    <ImageView
+        android:id="@+id/bg_frame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/home_bg"
+        android:scaleType="fitXY"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 顶部标题栏 -->
+    <ImageView
+        android:id="@+id/title_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/home_title"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 上排三个功能图标 -->
+    <ImageView
+        android:id="@+id/btn_heart_rate"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon1"
+        app:layout_constraintTop_toBottomOf="@id/title_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_positive_emotion"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <ImageView
+        android:id="@+id/btn_positive_emotion"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon2"
+        app:layout_constraintTop_toBottomOf="@id/title_bar"
+        app:layout_constraintStart_toEndOf="@id/btn_heart_rate"
+        app:layout_constraintEnd_toStartOf="@id/btn_negative_emotion"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <ImageView
+        android:id="@+id/btn_negative_emotion"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon3"
+        app:layout_constraintTop_toBottomOf="@id/title_bar"
+        app:layout_constraintStart_toEndOf="@id/btn_positive_emotion"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- 下排三个功能图标 -->
+    <ImageView
+        android:id="@+id/btn_hrvariability"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon4"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_physiological"
+        android:layout_marginBottom="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <ImageView
+        android:id="@+id/btn_physiological"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon5"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_container"
+        app:layout_constraintStart_toEndOf="@id/btn_hrvariability"
+        app:layout_constraintEnd_toStartOf="@id/btn_psychological"
+        android:layout_marginBottom="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <ImageView
+        android:id="@+id/btn_psychological"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:src="@drawable/icon6"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_container"
+        app:layout_constraintStart_toEndOf="@id/btn_physiological"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="40dp"
+        android:layout_marginHorizontal="16dp" />
+
+    <!-- 底部按钮容器 -->
+    <LinearLayout
+        android:id="@+id/bottom_button_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_bluetooth_detect"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="1. 蓝牙检测（选择设备)"
+            android:textSize="17sp"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start_detection"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="2. 开始检测（90秒）"
+            android:textSize="17sp"
+            android:enabled="false"
+            android:alpha="0.5"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_manual_upload"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="手动上传数据"
+                android:textSize="16sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_input_blood_pressure"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="输入血压"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 中心 Logo -->
+    <ImageView
+        android:id="@+id/center_icon"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:src="@drawable/home_logo"
+        app:layout_constraintTop_toBottomOf="@id/btn_heart_rate"
+        app:layout_constraintBottom_toTopOf="@id/btn_hrvariability"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+
+    <FrameLayout
+        android:id="@+id/uvc_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/uvc_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="90"
+        android:textSize="48sp"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp" />
+
+
+    <!-- ✅ 全屏摄像头预览（初始隐藏） -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+    <!-- ✅ 返回按钮（左上角） -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_exit_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="返回"
+        android:textColor="@android:color/white"
+        app:backgroundTint="#80000000"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="6dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp" />
+
+    <!-- ✅ 倒计时文本（顶部居中） -->
+    <TextView
+        android:id="@+id/tv_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="90"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:background="#80000000"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

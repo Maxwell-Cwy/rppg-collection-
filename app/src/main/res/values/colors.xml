@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material3 主色系列（对应themes.xml） -->
+    <color name="colorPrimary">#3F51B5</color>                  <!-- 蓝牙检测按钮主色（蓝色） -->
+    <color name="colorPrimaryDark">#303F9F</color>              <!-- 状态栏颜色（深蓝光） -->
+    <color name="colorPrimaryContainer">#C5CAE9</color>          <!-- 主色容器（浅蓝光） -->
+
+    <!-- Material3 次要色系列（开始检测按钮用） -->
+    <color name="colorAccent">#FF4081</color>                   <!-- 次要色（粉色） -->
+    <color name="colorAccentContainer">#FFCCE5</color>           <!-- 次要色容器（浅粉色） -->
+
+    <!-- 基础颜色 -->
+    <color name="white">#FFFFFF</color>                          <!-- 文本白色 -->
+    <color name="success_green">#4CAF50</color>                  <!-- 连接成功提示色（绿色） -->
+    <color name="black">#000000</color>                          <!-- previewView背景色（黑色） -->
+</resources>
