@@ -10,25 +10,52 @@ plugins {
 
 android {
     namespace 'com.example.myapplication'
-    compileSdk 36
+    compileSdk 34
+
+
+    signingConfigs {
+        release {
+            storeFile file("../my-release-key.jks")
+            storePassword "123456"
+            keyAlias "key0"
+            keyPassword "123456"
+
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
+        }
+    }
 
     defaultConfig {
         applicationId "com.example.myapplication"
-        minSdk 35
-        targetSdk 36
+        minSdk 27
+        targetSdk 34
         versionCode 1
         versionName "1.0"
-
+        ndkVersion "21.4.7075529"
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-
+/*
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
-    }
+    }*/
 
     // 关键：启用ViewBinding（可选，但有助于布局解析，减少渲染错误）
     buildFeatures {
@@ -41,6 +68,17 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11
+    }
+
+    /*
+    sourceSets {
+        main {
+
+            jniLibs.srcDirs = ['../libuvc/src/main/jniLibs']
+        }
+    }*/
+    packagingOptions {
+        jniLibs.useLegacyPackaging true
     }
 }
 
@@ -63,7 +101,6 @@ dependencies {
 
     implementation project(':libausbc')
     implementation project(':libutils')
-    implementation project(':libausbc')
     implementation project(':libuvc')
     implementation project(':libuvccommon')
 }

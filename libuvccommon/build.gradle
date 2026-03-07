@@ -23,7 +23,7 @@ android {
     //namespace "com.jiangdg.libuvccommon"
     namespace 'com.jiangdg.common'
     compileSdkVersion rootProject.ext.versionCompiler
-    buildToolsVersion rootProject.ext.versionBuildTool
+    //buildToolsVersion rootProject.ext.versionBuildTool
 
     compileOptions {
         sourceCompatibility rootProject.ext.javaSourceCompatibility

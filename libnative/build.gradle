@@ -9,7 +9,7 @@ android {
     // 1. 必须：添加 Namespace 适配 Gradle 8.x
     // 如果是 libuvc 模块，请改为 'com.jiangdg.uvc'
     namespace 'com.jiangdg.libnative'
-
+    ndkVersion "21.4.7075529"
 
 
     defaultConfig {

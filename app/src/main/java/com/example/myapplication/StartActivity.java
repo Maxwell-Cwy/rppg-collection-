@@ -294,14 +294,18 @@ public class StartActivity extends AppCompatActivity
             }.start();
 
             startCameraXPreviewAndRecord();
+
+// 延迟稍作调整，确保 videoRecorder 已经初始化完成
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (bluetoothService != null) {
+                    Log.d(TAG, "原生模式：开启蓝牙数据接收");
+                    bluetoothService.startReceivingData();
+                }
+            }, 800); // 增加到 800ms 避开 CameraX 的初始化峰值
+
         }
 
         btnExitPreview.setVisibility(View.VISIBLE);
-
-        /*
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            bluetoothService.startReceivingData();
-        }, 550);*/
 
     }
 
@@ -407,7 +411,7 @@ public class StartActivity extends AppCompatActivity
         if (!recordDir.exists()) recordDir.mkdirs();
 
         // 3. 视频文件必须叫 checkVideo.mp4 才能被你的上传逻辑识别
-        File videoFile = new File(recordDir, "checkVideo");
+        File videoFile = new File(recordDir, "checkVideo.mp4");
         videoFilePath = videoFile.getAbsolutePath();
 
         // 4. 启动 Fragment 并录制
@@ -421,6 +425,13 @@ public class StartActivity extends AppCompatActivity
 
                 // 直接录制到最终位置
                 uvc.startRecord(videoFilePath);
+
+
+                // ⭐ 核心修改：在 UVC 录制开始后，立即同步启动蓝牙接收
+                if (bluetoothService != null) {
+                    Log.d(TAG, "UVC 录制已开始，同步启动蓝牙接收");
+                    bluetoothService.startReceivingData();
+                }
             }
         }, 1500);
 
@@ -467,17 +478,24 @@ public class StartActivity extends AppCompatActivity
             try {
                 if (uvc.isAdded()) {
                     uvc.stopRecord();     // 你自己封装的
-                    uvc.releaseUvc();     // 你自己封装的
+
+
+                    // 模拟 CameraX 的回调，确保执行 DataSaver.saveAllData
+                    if (isDetectionInProgress && shouldSaveAndUpload) {
+                        String endTime = TimeUtils.getPreciseTimeStamp();
+                        onVideoFinished(videoFilePath, endTime);
+                    }
+                    uvc.releaseUvc();
                 }
             } catch (Exception e) {
                 Log.w(TAG, "stop uvc error", e);
             }
 
-            // 3️⃣ 移除 Fragment（一定要在 try 外）
-            getSupportFragmentManager()
-                    .beginTransaction()
+
+            getSupportFragmentManager().beginTransaction()
                     .remove(uvc)
                     .commitAllowingStateLoss();
+
         }
 
         // 4️⃣ 隐藏 UVC 容器
@@ -602,7 +620,11 @@ public class StartActivity extends AppCompatActivity
         isDetectionInProgress = false;
         timeStamp.setVideoEndTime(endTime);
         bluetoothService.stopReceivingData(); // 同步停止蓝牙
+        Fragment f = getSupportFragmentManager().findFragmentByTag(TAG_UVC);
 
+        if (f instanceof MyCameraFragment) {
+            ((MyCameraFragment) f).releaseUvc();
+        }
         runOnUiThread(() -> {
             // 清理倒计时显示
             if (countDownTimer != null) {

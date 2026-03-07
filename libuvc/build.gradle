@@ -6,7 +6,7 @@ android {
     namespace "com.jiangdg.libuvc"
 
 	compileSdkVersion rootProject.ext.versionCompiler
-	buildToolsVersion rootProject.ext.versionBuildTool
+	//buildToolsVersion rootProject.ext.versionBuildTool
 
 	compileOptions {
 		sourceCompatibility rootProject.ext.javaSourceCompatibility
@@ -36,7 +36,7 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['src/main/libs']
+            jniLibs.srcDirs = ['src/main/jniLibs']
         }
     }
 }
