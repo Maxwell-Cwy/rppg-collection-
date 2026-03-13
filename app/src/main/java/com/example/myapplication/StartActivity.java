@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+//import androidx.appcompat.widget.AbsActionBarView;
 import androidx.core.app.ActivityCompat;
 import com.example.myapplication.model.DetectionTimeStamp;
 import com.example.myapplication.model.OximeterData;
@@ -30,6 +31,8 @@ import com.google.android.material.button.MaterialButton;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class StartActivity extends AppCompatActivity
@@ -239,7 +242,7 @@ public class StartActivity extends AppCompatActivity
     }
 
 
-
+/*
     private void startDetection() {
         oximeterData.clear();
         timeStamp.clear();
@@ -308,6 +311,220 @@ public class StartActivity extends AppCompatActivity
         btnExitPreview.setVisibility(View.VISIBLE);
 
     }
+*/
+
+    private void startDetection() {
+        UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        List<UsbDevice> devices1 = getUvcDeviceList();
+
+        Log.d("UVC_DEBUG", "--- 开始全设备扫描 ---");
+        for (UsbDevice device1 : devices1) {
+            Log.d("UVC_DEBUG", "设备名称: " + device1.getProductName());
+            Log.d("UVC_DEBUG", "PID: " + device1.getProductId() + " | VID: " + device1.getVendorId());
+            Log.d("UVC_DEBUG", "接口数量: " + device1.getInterfaceCount());
+
+            for (int i = 0; i < device1.getInterfaceCount(); i++) {
+                android.hardware.usb.UsbInterface intf = device1.getInterface(i);
+                // 修正点：将 getInterfaceSubClass() 改为 getInterfaceSubclass()
+                Log.d("UVC_DEBUG", "  接口 " + i +
+                        " | Class: " + intf.getInterfaceClass() +
+                        " | SubClass: " + intf.getInterfaceSubclass() +
+                        " | 端点数: " + intf.getEndpointCount());
+            }
+        }
+        Log.d("UVC_DEBUG", "--- 扫描结束 ---");
+
+        // 1. 基础检查
+        if (!DataSaver.hasBloodPressure()) {
+            Toast.makeText(this, "请先输入血压值", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2. 检查 UVC 硬件
+        if (hasUvcCamera(this)) {
+            List<UsbDevice> devices = getUvcDeviceList();
+
+            // 如果有多个设备（RGB 和 NIR）
+            if (devices.size() >= 2) {
+                String[] items = new String[]{"打开彩色摄像头 (RGB)", "打开红外摄像头 (NIR)"};
+                new AlertDialog.Builder(this)
+                        .setTitle("检测到双目摄像头")
+                        .setItems(items, (dialog, which) -> {
+                            // ⭐ 只有用户点了这里，才真正开始进入 UVC 模式
+                            UsbDevice selectedDevice = devices.get(which);
+                            performStartUvc(selectedDevice, "0");
+                            dialog.dismiss(); // 确保对话框关闭
+                        })
+                        .setCancelable(true)
+                        .show();
+            } else if (devices.size() == 1) {
+                // 只有一个 UVC 设备
+                performStartUvc(devices.get(0), "0");
+            }
+        } else {
+            // 3. 没有 UVC，走 CameraX 模式
+            performStartCameraX();
+        }
+    }
+
+
+
+    private void startUvcRecordingTask() {
+        // 1. 获取 UVC 专用倒计时并置顶
+        TextView uvcCountdown = findViewById(R.id.uvc_countdown);
+        if (uvcCountdown != null) {
+            uvcCountdown.setVisibility(View.VISIBLE);
+            uvcCountdown.setText("--");
+            uvcCountdown.bringToFront();
+        }
+
+        btnExitPreview.setVisibility(View.VISIBLE);
+        btnExitPreview.bringToFront();
+
+        // 2. 生成文件路径
+        String rawTime = TimeUtils.getPreciseTimeStamp();
+        String timeWithoutMillis = rawTime.contains(".") ? rawTime.split("\\.")[0] : rawTime;
+        String timeStampFolder = timeWithoutMillis.replace("-", "").replace(":", "").replace(" ", "_");
+        File recordDir = new File(getExternalFilesDir(null), "OximeterRecords/" + timeStampFolder);
+        if (!recordDir.exists()) recordDir.mkdirs();
+
+        File videoFile = new File(recordDir, "checkVideo.mp4");
+        videoFilePath = videoFile.getAbsolutePath();
+
+        // 3. 延时启动录制和蓝牙
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            Fragment f = getSupportFragmentManager().findFragmentByTag(TAG_UVC);
+            if (f instanceof MyCameraFragment && f.isAdded()) {
+                MyCameraFragment uvc = (MyCameraFragment) f;
+
+                // 记录开始时间并启动录制
+                timeStamp.setVideoStartTime(TimeUtils.getPreciseTimeStamp());
+                uvc.startRecord(videoFilePath);
+
+                // 同步启动蓝牙接收
+                if (bluetoothService != null) {
+                    Log.d(TAG, "UVC 录制已开始，同步启动蓝牙接收");
+                    bluetoothService.startReceivingData();
+                }
+            }
+        }, 1500); // 给摄像头硬件一点初始化的时间
+    }
+
+    private void performStartUvc(UsbDevice device, String cameraId) {
+        // 1. 标记检测状态
+        isDetectionInProgress = true;
+        shouldSaveAndUpload = true;
+
+        // 2. 暴力清理旧 Fragment 并释放资源
+        Fragment old = getSupportFragmentManager().findFragmentByTag(TAG_UVC);
+        if (old != null) {
+            if (old instanceof MyCameraFragment) {
+                ((MyCameraFragment) old).releaseUvc(); // 显式调用你写的释放方法
+            }
+            getSupportFragmentManager().beginTransaction().remove(old).commitNowAllowingStateLoss();
+        }
+
+        // 3. UI 切换逻辑 (省略你的 setVisibility 代码...)
+        // 1. UI 彻底切换
+        findViewById(R.id.uvc_container).setVisibility(View.VISIBLE);
+        findViewById(R.id.bg_frame).setVisibility(View.GONE);
+        findViewById(R.id.center_icon).setVisibility(View.GONE);
+        findViewById(R.id.bottom_button_container).setVisibility(View.GONE);
+        findViewById(R.id.title_bar).setVisibility(View.GONE);
+
+        int[] iconIds = {R.id.btn_heart_rate, R.id.btn_positive_emotion, R.id.btn_negative_emotion,
+                R.id.btn_hrvariability, R.id.btn_physiological, R.id.btn_psychological};
+        for (int id : iconIds) {
+            View v = findViewById(id);
+            if (v != null) v.setVisibility(View.GONE);
+        }
+
+        btnExitPreview.setVisibility(View.VISIBLE);
+        btnExitPreview.bringToFront();
+
+
+        Log.i("UVC_SELECT", "用户选择了设备: " + device.getProductName());
+        Log.i("UVC_SELECT", "  VID:PID = " + device.getVendorId() + ":" + device.getProductId());
+        Log.i("UVC_SELECT", "  deviceName / 设备路径 = " + device.getDeviceName());
+        Log.i("UVC_SELECT", "  deviceClass = " + device.getDeviceClass());
+
+        // 4. ⭐ 给总线和驱动 800ms 的“断电”时间
+        // 必须等待系统把旧设备的占位符彻底清除
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            MyCameraFragment fragment = new MyCameraFragment();
+
+            // ⭐ 这里的 device 必须是 AlertDialog 选中的选中的那个对象 (PID: 20834)
+            fragment.setTargetDevice(device);
+
+            // 将物理路径传入 ID，直接锁死底层设备文件
+            fragment.setRequestedId(device.getDeviceName());
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.uvc_container, fragment, TAG_UVC)
+                    .commitAllowingStateLoss();
+
+            startUvcRecordingTask();
+
+            Log.d("UVC_SWAP", "已发起红外切换请求，目标物理路径: " + device.getDeviceName());
+        }, 800);
+    }
+
+
+
+    private void performStartCameraX() {
+        previewView.setVisibility(View.VISIBLE);
+        tvCountdown.setVisibility(View.VISIBLE);
+
+        countDownTimer = new CountDownTimer(90_000, 1_000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                tvCountdown.setText(String.valueOf(millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish() {
+                tvCountdown.setText("0");
+                tvCountdown.setVisibility(View.GONE);
+            }
+        }.start();
+
+        startCameraXPreviewAndRecord();
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (bluetoothService != null) {
+                bluetoothService.startReceivingData();
+            }
+        }, 800);
+
+        // ⭐ 这里必须有一个大括号闭合方法！
+        // 你报错 463 行的 btnExitPreview 可能就是因为漏了或多了括号掉到外面去了
+        btnExitPreview.setVisibility(View.VISIBLE);
+    } // <--- 确保这个括号存在且位置正确
+
+
+    // 1. 把 getUvcDeviceList 粘贴到 StartActivity 的末尾
+    private List<UsbDevice> getUvcDeviceList() {
+        UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        List<UsbDevice> uvcList = new ArrayList<>();
+        if (usbManager == null) return uvcList;
+        for (UsbDevice device : usbManager.getDeviceList().values()) {
+            boolean isUvc = false;
+            if (device.getDeviceClass() == UsbConstants.USB_CLASS_VIDEO) {
+                isUvc = true;
+            } else {
+                for (int i = 0; i < device.getInterfaceCount(); i++) {
+                    if (device.getInterface(i).getInterfaceClass() == UsbConstants.USB_CLASS_VIDEO) {
+                        isUvc = true;
+                        break;
+                    }
+                }
+            }
+            if (isUvc) uvcList.add(device);
+        }
+        return uvcList;
+    }
+
+
 
 
     private void startCameraXPreviewAndRecord() {
@@ -445,21 +662,15 @@ public class StartActivity extends AppCompatActivity
         if (usbManager == null) return false;
 
         for (UsbDevice device : usbManager.getDeviceList().values()) {
-            // UVC 设备的标准 class
-            if (device.getDeviceClass() == UsbConstants.USB_CLASS_VIDEO) {
-                return true;
-            }
-
-            // 有些 UVC 是 interface 级别声明
+            if (device.getDeviceClass() == UsbConstants.USB_CLASS_VIDEO) return true;
             for (int i = 0; i < device.getInterfaceCount(); i++) {
-                if (device.getInterface(i).getInterfaceClass()
-                        == UsbConstants.USB_CLASS_VIDEO) {
-                    return true;
-                }
+                if (device.getInterface(i).getInterfaceClass() == UsbConstants.USB_CLASS_VIDEO) return true;
             }
         }
         return false;
     }
+
+
 
     private void exitUvcMode() {
         Log.d(TAG, "exitUvcMode");
